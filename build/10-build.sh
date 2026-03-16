@@ -18,12 +18,27 @@ mkdir -p /var/lib/dpkg/
 apt-get update
 apt-get install -y debconf
 
-# Install ubuntu-desktop
 export DEBIAN_FRONTEND=noninteractive
+
+# Install sway
 apt-get install -y \
+    foot-themes \
     sway \
-    lightdm \
-    podman
+    sway-backgrounds \
+    swayidle \
+    swaylock \
+    xdg-desktop-portal-gtk \
+    xdg-desktop-portal-wlr
+
+
+apt-get install -y \
+    podman \
+    xwayland
+
+apt-get install -y whois
+usermod -p "$(echo "changeme" | mkpasswd -s)" root
+
+apt-get clean -y
 
 echo "::endgroup::"
 
