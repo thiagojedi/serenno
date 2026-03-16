@@ -9,45 +9,43 @@ set -eoux pipefail
 # It uses set -eoux pipefail for strict error handling and debugging.
 ###############################################################################
 
-# Source helper functions
-# shellcheck source=/dev/null
-source /ctx/build/copr-helpers.sh
+echo "::group:: Install Sway Desktop"
 
-# Enable nullglob for all glob operations to prevent failures on empty matches
-shopt -s nullglob
+mkdir -p /var/lib/apt/lists/partial
+mkdir -p /var/lib/dpkg/
 
-echo "::group:: Copy Bluefin Config from Common"
+# Update package lists
+apt-get update
+apt-get install -y debconf
 
-# Copy just files from @projectbluefin/common (includes 00-entry.just which imports 60-custom.just)
-mkdir -p /usr/share/ublue-os/just/
-shopt -s nullglob
-cp -r /ctx/oci/common/bluefin/usr/share/ublue-os/just/* /usr/share/ublue-os/just/
-shopt -u nullglob
+# Install ubuntu-desktop
+export DEBIAN_FRONTEND=noninteractive
+apt-get install -y \
+    sway \
+    lightdm \
+    podman
 
 echo "::endgroup::"
 
 echo "::group:: Copy Custom Files"
 
-# Copy Brewfiles to standard location
+# Copy Brewfiles to standard location (if using homebrew)
 mkdir -p /usr/share/ublue-os/homebrew/
-cp /ctx/custom/brew/*.Brewfile /usr/share/ublue-os/homebrew/
+if [ -d /ctx/custom/brew ]; then
+    cp /ctx/custom/brew/*.Brewfile /usr/share/ublue-os/homebrew/ 2>/dev/null || true
+fi
 
-# Consolidate Just Files
-find /ctx/custom/ujust -iname '*.just' -exec printf "\n\n" \; -exec cat {} \; >> /usr/share/ublue-os/just/60-custom.just
+# Consolidate Just Files (if using ujust)
+mkdir -p /usr/share/ublue-os/just/
+if [ -d /ctx/custom/ujust ]; then
+    find /ctx/custom/ujust -iname '*.just' -exec printf "\n\n" \; -exec cat {} \; >> /usr/share/ublue-os/just/60-custom.just 2>/dev/null || true
+fi
 
-# Copy Flatpak preinstall files
+# Copy Flatpak preinstall files (if using flatpak)
 mkdir -p /etc/flatpak/preinstall.d/
-cp /ctx/custom/flatpaks/*.preinstall /etc/flatpak/preinstall.d/
-
-echo "::endgroup::"
-
-echo "::group:: Install Packages"
-
-# Install packages using dnf5
-# Example: dnf5 install -y tmux
-
-# Example using COPR with isolated pattern:
-# copr_install_isolated "ublue-os/staging" package-name
+if [ -d /ctx/custom/flatpaks ]; then
+    cp /ctx/custom/flatpaks/*.preinstall /etc/flatpak/preinstall.d/ 2>/dev/null || true
+fi
 
 echo "::endgroup::"
 
