@@ -41,7 +41,7 @@ COPY build /build
 COPY custom /custom
 
 # Base Image - GNOME included
-FROM ghcr.io/bootcrew/debian-bootc:latest
+FROM ghcr.io/bootcrew/debian-bootc:latest@sha256:6d045679a414fce1b1feced45c8b6a6cce499051878e118e863956d216522c0f
 
 ### /opt
 ## Some bootable images, like Fedora, have /opt symlinked to /var/opt, in order to
