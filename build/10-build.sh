@@ -66,6 +66,10 @@ echo "::endgroup::"
 
 echo "::group:: System Configuration"
 
+cp /ctx/custom/os-release /usr/lib/os-release 
+
+cat /usr/lib/os-release
+
 # Enable/disable systemd services
 systemctl enable podman.socket
 # Example: systemctl mask unwanted-service

@@ -1,0 +1,8 @@
+PRETTY_NAME="Serenno"
+NAME="Serenno"
+VERSION_CODENAME=dooku
+ID=serenno
+HOME_URL="https://github.com/thiagojedi/serenno"
+SUPPORT_URL="https://github.com/thiagojedi/serenno/issues"
+BUG_REPORT_URL="https://github.com/thiagojedi/serenno/issues"
+VERSION_ID=0.1

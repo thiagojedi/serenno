@@ -1,5 +1,5 @@
 export image_name := env("IMAGE_NAME", "serenno")
-export default_tag := env("DEFAULT_TAG", "latest")
+export default_tag := env("DEFAULT_TAG", "stable")
 export image_tag := env("BUILD_IMAGE_TAG", default_tag)
 export base_dir := env("BUILD_BASE_DIR", ".")
 export filesystem := env("BUILD_FILESYSTEM", "ext4")
@@ -7,7 +7,7 @@ export filesystem := env("BUILD_FILESYSTEM", "ext4")
 container_runtime := env("CONTAINER_RUNTIME", `command -v podman >/dev/null 2>&1 && echo podman || echo docker`)
 
 build-containerfile $image_name=image_name:
-    sudo {{container_runtime}} build -f Containerfile -t "${image_name}:latest" .
+    sudo {{container_runtime}} build -f Containerfile -t "${image_name}:${{default_tag}}" .
 
 bootc *ARGS:
     sudo {{container_runtime}} run \
@@ -24,10 +24,13 @@ bootc *ARGS:
 
 generate-bootable-image $base_dir=base_dir $filesystem=filesystem:
     #!/usr/bin/env bash
-    if [ ! -e "${base_dir}/bootable.img" ] ; then
-        fallocate -l 20G "${base_dir}/bootable.img"
-    fi
-    just bootc install to-disk --composefs-backend --via-loopback /data/bootable.img --filesystem "${filesystem}" --wipe --bootloader systemd
+    sudo {{container_runtime}} run \
+        --privileged \
+        --rm \
+        -it \
+        -v ./output:/output \
+        ghcr.io/osbuild/image-builder-cli:latest \
+        build bootc-installer --bootc-ref ghcr.io/thiagojedi/{{image_name}}:{{default_tag}}
 
 # Runs shfmt on all Bash scripts
 format:
